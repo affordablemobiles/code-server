@@ -21,6 +21,7 @@ import {
   escapeJSON,
   splitOnFirstEquals,
 } from "./util"
+import {OAuth2Client, Certificates} from "google-auth-library"
 
 /**
  * Base options included on every page.
@@ -111,6 +112,9 @@ export const ensureAuthenticated = async (
   }
 }
 
+const oAuth2Client = new OAuth2Client();
+var iapKeys: Certificates
+
 /**
  * Return true if authenticated via cookies.
  */
@@ -118,6 +122,28 @@ export const authenticated = async (req: express.Request): Promise<boolean> => {
   switch (req.args.auth) {
     case AuthType.None: {
       return true
+    }
+    case AuthType.GoogleIAP: {
+      const assertion = req.header('X-Goog-IAP-JWT-Assertion');
+      
+      if (iapKeys == undefined) {
+        const iapKeysResult = await oAuth2Client.getIapPublicKeys();
+        iapKeys = iapKeysResult.pubkeys
+      }
+
+      const ticket = await oAuth2Client.verifySignedJwtWithCertsAsync(
+        assertion ?? '',
+        iapKeys,
+        req.args.audience,
+        ['https://cloud.google.com/iap']
+      );
+      const payload = ticket.getPayload();
+
+      if (payload?.email ?? '') {
+        return true;
+      } else {
+        return false;
+      }
     }
     case AuthType.Password: {
       // The password is stored in the cookie after being hashed.

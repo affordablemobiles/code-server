@@ -11,6 +11,7 @@ export enum Feature {
 }
 
 export enum AuthType {
+  GoogleIAP = "iap",
   Password = "password",
   None = "none",
 }
@@ -64,6 +65,7 @@ export interface UserProvidedCodeArgs {
 export interface UserProvidedArgs extends UserProvidedCodeArgs {
   config?: string
   auth?: AuthType
+  audience?: string
   password?: string
   "hashed-password"?: string
   cert?: OptionalString
@@ -136,6 +138,10 @@ export type Options<T> = {
 
 export const options: Options<Required<UserProvidedArgs>> = {
   auth: { type: AuthType, description: "The type of authentication to use." },
+  audience: {
+    type: "string",
+    description: "The audience value for IAP authentication.",
+  },
   password: {
     type: "string",
     description: "The password for password authentication (can only be passed in via $PASSWORD or the config file).",
