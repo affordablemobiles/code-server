@@ -139,11 +139,15 @@ export const authenticated = async (req: express.Request): Promise<boolean> => {
       );
       const payload = ticket.getPayload();
 
-      if (payload?.email ?? '') {
+      if (req.args.email ?? '') {
+        if (payload?.email == req.args.email) {
+          return true;
+        }
+      } else if (payload?.email ?? '') {
         return true;
-      } else {
-        return false;
       }
+
+      return false;
     }
     case AuthType.Password: {
       // The password is stored in the cookie after being hashed.

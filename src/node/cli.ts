@@ -66,6 +66,7 @@ export interface UserProvidedArgs extends UserProvidedCodeArgs {
   config?: string
   auth?: AuthType
   audience?: string
+  email?: string
   password?: string
   "hashed-password"?: string
   cert?: OptionalString
@@ -141,6 +142,10 @@ export const options: Options<Required<UserProvidedArgs>> = {
   audience: {
     type: "string",
     description: "The audience value for IAP authentication.",
+  },
+  email: {
+    type: "string",
+    description: "The user email value for IAP authentication.",
   },
   password: {
     type: "string",
