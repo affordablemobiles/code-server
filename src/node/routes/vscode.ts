@@ -13,6 +13,8 @@ import { authenticated, ensureAuthenticated, ensureOrigin, redirect, replaceTemp
 import { SocketProxyProvider } from "../socket"
 import { isFile, loadAMDModule } from "../util"
 import { Router as WsRouter } from "../wsRouter"
+import { AuthType } from "../cli"
+import { HttpCode, HttpError } from "../../common/http"
 
 export const router = express.Router()
 
@@ -76,7 +78,11 @@ router.get("/", ensureVSCodeLoaded, async (req, res, next) => {
   // Ew means the workspace was closed so clear the last folder/workspace.
   const FOLDER_OR_WORKSPACE_WAS_CLOSED = req.query.ew
 
-  if (!isAuthenticated) {
+  if ((!isAuthenticated) && (req.args.auth == AuthType.GoogleIAP)) {
+    throw new HttpError("Unauthorized", HttpCode.Unauthorized);
+
+    return;
+  } else if (!isAuthenticated) {
     const to = self(req)
     return redirect(req, res, "login", {
       to: to !== "/" ? to : undefined,

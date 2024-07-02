@@ -3,6 +3,7 @@ import { HttpCode, HttpError } from "../../common/http"
 import { getHost, ensureProxyEnabled, authenticated, ensureAuthenticated, ensureOrigin, redirect, self } from "../http"
 import { proxy } from "../proxy"
 import { Router as WsRouter } from "../wsRouter"
+import { AuthType } from "../cli"
 
 export const router = Router()
 
@@ -63,7 +64,11 @@ router.all(/.*/, async (req, res, next) => {
 
   // Must be authenticated to use the proxy.
   const isAuthenticated = await authenticated(req)
-  if (!isAuthenticated) {
+  if ((!isAuthenticated) && (req.args.auth == AuthType.GoogleIAP)) {
+    throw new HttpError("Unauthorized", HttpCode.Unauthorized);
+
+    return;
+  } else if (!isAuthenticated) {
     // Let the assets through since they're used on the login page.
     if (req.path.startsWith("/static/") && req.method === "GET") {
       return next()

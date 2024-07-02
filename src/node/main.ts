@@ -144,7 +144,10 @@ export const runCodeServer = async (
     if (! args.audience ?? '') {
       throw new Error("Google IAP Audience undefined");
     }
-    logger.error(`    - Using audience: ${args.audience}`);
+    logger.info(`    - Using audience: ${args.audience}`);
+    if (args.email ?? '') {
+      logger.info(`    - Locked to user email: ${args.email}`);
+    }
   } else {
     logger.info("  - Authentication is disabled")
   }
