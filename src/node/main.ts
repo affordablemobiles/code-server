@@ -149,7 +149,7 @@ export const runCodeServer = async (
     }
   } else if (args.auth === AuthType.GoogleIAP) {
     logger.info("  - Authentication via Google IAP is enabled");
-    if (! args.audience ?? '') {
+    if (! (args.audience ?? '')) {
       throw new Error("Google IAP Audience undefined");
     }
     logger.info(`    - Using audience: ${args.audience}`);

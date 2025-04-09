@@ -47,7 +47,7 @@
     "@types/express": "^5.0.0",
     "@types/http-proxy": "1.17.7",
     "@types/js-yaml": "^4.0.6",
-    "@types/node": "20.x",
+    "@types/node": "^20.17.30",
     "@types/pem": "^1.14.1",
     "@types/proxy-from-env": "^1.0.1",
     "@types/safe-compare": "^1.1.0",
@@ -74,6 +74,7 @@
     "cookie-parser": "^1.4.6",
     "env-paths": "^2.2.1",
     "express": "^5.0.1",
+    "google-auth-library": "^9.11.0",
     "http-proxy": "^1.18.1",
     "httpolyglot": "^0.1.2",
     "i18next": "^23.5.1",
@@ -87,8 +88,7 @@
     "safe-compare": "^1.1.4",
     "semver": "^7.5.4",
     "ws": "^8.14.2",
-    "xdg-basedir": "^4.0.0",
-    "google-auth-library": "^9.11.0"
+    "xdg-basedir": "^4.0.0"
   },
   "resolutions": {
     "@types/node": "20.x"
