@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: codercom/code-server
-  tag: '4.90.3'
+  tag: '4.99.1'
   pullPolicy: Always
 
 # Specifies one or more secrets to be used when pulling images from a
@@ -18,6 +18,9 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 hostnameOverride: ""
+
+# The existing secret to use for code-server authentication in the frontend. the password is stored in the secret under the key `password`
+# existingSecret: ""
 
 serviceAccount:
   # Specifies whether a service account should be created

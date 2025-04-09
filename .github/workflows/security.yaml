@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  audit-ci:
+  audit:
     name: Audit node modules
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -34,12 +34,8 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - name: Audit yarn for vulnerabilities
-        run: yarn audit
-        if: success()
-
       - name: Audit npm for vulnerabilities
-        run: npm shrinkwrap && npm audit
+        run: npm audit
         if: success()
 
   trivy-scan-repo:
@@ -55,7 +51,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@fd25fed6972e341ff0007ddb61f77e88103953c2
+        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0
         with:
           scan-type: "fs"
           scan-ref: "."

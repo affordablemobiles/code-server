@@ -41,7 +41,7 @@ Index: code-server/lib/vscode/src/vs/workbench/services/environment/browser/envi
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/workbench/services/environment/browser/environmentService.ts
 +++ code-server/lib/vscode/src/vs/workbench/services/environment/browser/environmentService.ts
-@@ -225,7 +225,7 @@ export class BrowserWorkbenchEnvironment
+@@ -220,7 +220,7 @@ export class BrowserWorkbenchEnvironment
  
  	@memoize
  	get webviewExternalEndpoint(): string {
@@ -54,11 +54,11 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/webClientServer.ts
 +++ code-server/lib/vscode/src/vs/server/node/webClientServer.ts
-@@ -325,6 +325,7 @@ export class WebClientServer {
+@@ -355,6 +355,7 @@ export class WebClientServer {
  		const workbenchWebConfiguration = {
  			remoteAuthority,
- 			serverBasePath: this._basePath,
-+			webviewEndpoint: vscodeBase + this._staticRoute + '/out/vs/workbench/contrib/webview/browser/pre',
+ 			serverBasePath: basePath,
++			webviewEndpoint: staticRoute + '/out/vs/workbench/contrib/webview/browser/pre',
  			_wrapWebWorkerExtHostInIframe,
  			developmentOptions: { enableSmokeTestDriver: this._environmentService.args['enable-smoke-test-driver'] ? true : undefined, logLevel: this._logService.getLevel() },
  			settingsSyncOptions: !this._environmentService.isBuilt && this._environmentService.args['enable-sync'] ? { enabled: true } : undefined,
@@ -70,12 +70,12 @@ Index: code-server/lib/vscode/src/vs/workbench/contrib/webview/browser/pre/index
  	<meta charset="UTF-8">
  
  	<meta http-equiv="Content-Security-Policy"
--		content="default-src 'none'; script-src 'sha256-bQPwjO6bLiyf6v9eDVtAI67LrfonA1w49aFkRXBy4/g=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
-+		content="default-src 'none'; script-src 'sha256-R3BsSkqy7qFbvWSmwr7WqT1eg6Sq4zSe0uIlrUQ4EKE=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
+-		content="default-src 'none'; script-src 'sha256-nlLyDpnjtftJG2xvXh2vuy77l7xFTjfOz7Jnj1iXNmA=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
++		content="default-src 'none'; script-src 'sha256-ap/AtocvSWp0rrxaO19DJy/nOpazT6M5Cv9utUWe7MA=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
+ 
  
  	<!-- Disable pinch zooming -->
- 	<meta name="viewport"
-@@ -344,6 +344,12 @@
+@@ -349,6 +349,12 @@
  
  				const hostname = location.hostname;
  
@@ -113,12 +113,12 @@ Index: code-server/lib/vscode/src/vs/workbench/services/extensions/worker/webWor
  		<meta http-equiv="Content-Security-Policy" content="
  			default-src 'none';
  			child-src 'self' data: blob:;
--			script-src 'self' 'unsafe-eval' 'sha256-75NYUUvf+5++1WbfCZOV3PSWxBhONpaxwx+mkOFRv/Y=' https:;
-+			script-src 'self' 'unsafe-eval' 'sha256-c7vPrYRaSLDtFSrI4CuHYgBQ3a4c4x2LSm/LefSZADQ=' https:;
+-			script-src 'self' 'unsafe-eval' 'sha256-cl8ijlOzEe+0GRCQNJQu2k6nUQ0fAYNYIuuKEm72JDs=' https: http://localhost:* blob:;
++			script-src 'self' 'unsafe-eval' 'sha256-yhZXuB8LS6t73dvNg6rtLX8y4PHLnqRm5+6DdOGkOcw=' https: http://localhost:* blob:;
  			connect-src 'self' https: wss: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*;"/>
  	</head>
  	<body>
-@@ -23,6 +23,13 @@
+@@ -25,6 +25,13 @@
  			// validation not requested
  			return start();
  		}

@@ -4,7 +4,6 @@ import * as express from "express"
 import { promises as fs } from "fs"
 import * as path from "path"
 import * as tls from "tls"
-import * as pluginapi from "../../../typings/pluginapi"
 import { Disposable } from "../../common/emitter"
 import { HttpCode, HttpError } from "../../common/http"
 import { plural } from "../../common/util"
@@ -12,12 +11,11 @@ import { App } from "../app"
 import { AuthType, DefaultedArgs } from "../cli"
 import { commit, rootPath } from "../constants"
 import { Heart } from "../heart"
-import { ensureAuthenticated, redirect } from "../http"
-import { PluginAPI } from "../plugin"
+import { redirect } from "../http"
 import { CoderSettings, SettingsProvider } from "../settings"
 import { UpdateProvider } from "../update"
+import type { WebsocketRequest } from "../wsRouter"
 import { getMediaMime, paths } from "../util"
-import * as apps from "./apps"
 import * as domainProxy from "./domainProxy"
 import { errorHandler, wsErrorHandler } from "./errors"
 import * as health from "./health"
@@ -81,62 +79,52 @@ export const register = async (app: App, args: DefaultedArgs): Promise<Disposabl
   app.router.use(common)
   app.wsRouter.use(common)
 
-  app.router.use(async (req, res, next) => {
+  app.router.use(/.*/, async (req, res, next) => {
     // If we're handling TLS ensure all requests are redirected to HTTPS.
     // TODO: This does *NOT* work if you have a base path since to specify the
     // protocol we need to specify the whole path.
     if (args.cert && !(req.connection as tls.TLSSocket).encrypted) {
       return res.redirect(`https://${req.headers.host}${req.originalUrl}`)
     }
-
-    // Return security.txt.
-    if (req.originalUrl === "/security.txt" || req.originalUrl === "/.well-known/security.txt") {
-      const resourcePath = path.resolve(rootPath, "src/browser/security.txt")
-      res.set("Content-Type", getMediaMime(resourcePath))
-      return res.send(await fs.readFile(resourcePath))
-    }
-
-    // Return robots.txt.
-    if (req.originalUrl === "/robots.txt") {
-      const resourcePath = path.resolve(rootPath, "src/browser/robots.txt")
-      res.set("Content-Type", getMediaMime(resourcePath))
-      return res.send(await fs.readFile(resourcePath))
-    }
-
     next()
+  })
+
+  app.router.get(["/security.txt", "/.well-known/security.txt"], async (_, res) => {
+    const resourcePath = path.resolve(rootPath, "src/browser/security.txt")
+    res.set("Content-Type", getMediaMime(resourcePath))
+    res.send(await fs.readFile(resourcePath))
+  })
+
+  app.router.get("/robots.txt", async (_, res) => {
+    const resourcePath = path.resolve(rootPath, "src/browser/robots.txt")
+    res.set("Content-Type", getMediaMime(resourcePath))
+    res.send(await fs.readFile(resourcePath))
   })
 
   app.router.use("/", domainProxy.router)
   app.wsRouter.use("/", domainProxy.wsRouter.router)
 
-  app.router.all("/proxy/:port/:path(.*)?", async (req, res) => {
+  app.router.all("/proxy/:port{/*path}", async (req, res) => {
     await pathProxy.proxy(req, res)
   })
-  app.wsRouter.get("/proxy/:port/:path(.*)?", async (req) => {
-    await pathProxy.wsProxy(req as pluginapi.WebsocketRequest)
+  app.wsRouter.get("/proxy/:port{/*path}", async (req) => {
+    await pathProxy.wsProxy(req as unknown as WebsocketRequest)
   })
   // These two routes pass through the path directly.
   // So the proxied app must be aware it is running
   // under /absproxy/<someport>/
-  app.router.all("/absproxy/:port/:path(.*)?", async (req, res) => {
+  app.router.all("/absproxy/:port{/*path}", async (req, res) => {
     await pathProxy.proxy(req, res, {
       passthroughPath: true,
+      proxyBasePath: args["abs-proxy-base-path"],
     })
   })
-  app.wsRouter.get("/absproxy/:port/:path(.*)?", async (req) => {
-    await pathProxy.wsProxy(req as pluginapi.WebsocketRequest, {
+  app.wsRouter.get("/absproxy/:port{/*path}", async (req) => {
+    await pathProxy.wsProxy(req as unknown as WebsocketRequest, {
       passthroughPath: true,
+      proxyBasePath: args["abs-proxy-base-path"],
     })
   })
-
-  let pluginApi: PluginAPI
-  if (!process.env.CS_DISABLE_PLUGINS) {
-    const workingDir = args._ && args._.length > 0 ? path.resolve(args._[args._.length - 1]) : undefined
-    pluginApi = new PluginAPI(logger, process.env.CS_PLUGIN, process.env.CS_PLUGIN_PATH, workingDir)
-    await pluginApi.loadPlugins()
-    pluginApi.mount(app.router, app.wsRouter)
-    app.router.use("/api/applications", ensureAuthenticated, apps.router(pluginApi))
-  }
 
   app.router.use(express.json())
   app.router.use(express.urlencoded({ extended: true }))
@@ -170,7 +158,9 @@ export const register = async (app: App, args: DefaultedArgs): Promise<Disposabl
 
   app.router.use("/update", update.router)
 
-  // Note that the root route is replaced in Coder Enterprise by the plugin API.
+  // For historic reasons we also load at /vscode because the root was replaced
+  // by a plugin in v1 of Coder.  The plugin system (which was for internal use
+  // only) has been removed, but leave the additional route for now.
   for (const routePrefix of ["/vscode", "/"]) {
     app.router.use(routePrefix, vscode.router)
     app.wsRouter.use(routePrefix, vscode.wsRouter.router)
@@ -185,7 +175,6 @@ export const register = async (app: App, args: DefaultedArgs): Promise<Disposabl
 
   return () => {
     heart.dispose()
-    pluginApi?.dispose()
     vscode.dispose()
   }
 }

@@ -70,7 +70,7 @@ router.all(/.*/, async (req, res, next) => {
     return;
   } else if (!isAuthenticated) {
     // Let the assets through since they're used on the login page.
-    if (req.path.startsWith("/static/") && req.method === "GET") {
+    if (req.path.startsWith("/_static/") && req.method === "GET") {
       return next()
     }
 

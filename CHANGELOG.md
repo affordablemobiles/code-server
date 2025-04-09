@@ -22,6 +22,130 @@ Code v99.99.999
 
 ## Unreleased
 
+## [4.99.1](https://github.com/coder/code-server/releases/tag/v4.99.1) - 2025-04-08
+
+Code v1.99.1
+
+### Changed
+
+- Update to Code 1.99.1.
+
+## [4.99.0](https://github.com/coder/code-server/releases/tag/v4.99.0) - 2025-04-07
+
+Code v1.99.0
+
+### Changed
+
+- Update to Code 1.99.0.
+
+## [4.98.0](https://github.com/coder/code-server/releases/tag/v4.98.0) - 2025-03-07
+
+Code v1.98.0
+
+### Changed
+
+- Update to Code 1.98.0.
+
+## [4.97.2](https://github.com/coder/code-server/releases/tag/v4.96.4) - 2025-02-18
+
+Code v1.97.2
+
+### Added
+
+- Added back macOS amd64 builds.
+
+### Changed
+
+- Update to Code 1.97.2.
+- Softened dark mode login page colors.
+
+## [4.96.4](https://github.com/coder/code-server/releases/tag/v4.96.4) - 2025-01-20
+
+Code v1.96.4
+
+### Changed
+
+- Update to Code 1.96.4.
+
+## [4.96.2](https://github.com/coder/code-server/releases/tag/v4.96.2) - 2024-12-20
+
+Code v1.96.2
+
+### Changed
+
+- Update to Code 1.96.2.
+
+## [4.96.1](https://github.com/coder/code-server/releases/tag/v4.96.1) - 2024-12-18
+
+Code v1.96.1
+
+### Added
+
+- Dark color scheme for login and error pages.
+
+### Changed
+
+- Update to Code 1.96.1.
+
+## [4.95.3](https://github.com/coder/code-server/releases/tag/v4.95.3) - 2024-11-18
+
+Code v1.95.3
+
+### Changed
+
+- Update to Code 1.95.3.
+
+## [4.95.2](https://github.com/coder/code-server/releases/tag/v4.95.2) - 2024-11-12
+
+Code v1.95.2
+
+### Changed
+
+- Update to Code 1.95.2.
+
+## [4.95.1](https://github.com/coder/code-server/releases/tag/v4.95.1) - 2024-11-06
+
+Code v1.95.1
+
+### Changed
+
+- Update to Code 1.95.1.
+
+## [4.93.1](https://github.com/coder/code-server/releases/tag/v4.93.1) - 2024-09-23
+
+Code v1.93.1
+
+### Changed
+
+- Updated to Code 1.93.1.
+
+### Added
+
+- Added `--abs-proxy-base-path` flag for when code-server is not at the root.
+
+## [4.92.2](https://github.com/coder/code-server/releases/tag/v4.92.2) - 2024-08-19
+
+Code v1.92.2
+
+### Breaking changes
+
+- Dropped a patch that changed the compile target from es2022 to es2020 because
+  it no longer works with the way VS Code uses static properties. This may break
+  older browsers, so those browsers will either have to be updated or use an
+  older version of code-server.
+
+### Changed
+
+- Updated to Code 1.92.2.
+
+## [4.91.0](https://github.com/coder/code-server/releases/tag/v4.91.0) - 2024-07-10
+
+Code v1.91.0
+
+### Changed
+
+- Updated to Code 1.91.0.
+
 ## [4.90.3](https://github.com/coder/code-server/releases/tag/v4.90.3) - 2024-06-21
 
 Code v1.90.2
