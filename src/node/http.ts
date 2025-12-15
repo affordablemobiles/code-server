@@ -113,7 +113,25 @@ export const ensureAuthenticated = async (
 }
 
 const oAuth2Client = new OAuth2Client();
-var iapKeys: Certificates
+let iapKeys: Certificates | undefined
+let lastKeyFetchTime = 0
+
+const getIapKeys = async (): Promise<Certificates> => {
+  const now = Date.now()
+  if (!iapKeys || now - lastKeyFetchTime > 60 * 60 * 1000) {
+    try {
+      const iapKeysResult = await oAuth2Client.getIapPublicKeys()
+      iapKeys = iapKeysResult.pubkeys
+      lastKeyFetchTime = now
+    } catch (error) {
+      logger.error("Failed to fetch IAP keys", field("error", error))
+      if (!iapKeys) {
+        throw error
+      }
+    }
+  }
+  return iapKeys
+}
 
 /**
  * Return true if authenticated via cookies.
@@ -124,30 +142,27 @@ export const authenticated = async (req: express.Request): Promise<boolean> => {
       return true
     }
     case AuthType.GoogleIAP: {
-      const assertion = req.header('X-Goog-IAP-JWT-Assertion');
-      
-      if (iapKeys == undefined) {
-        const iapKeysResult = await oAuth2Client.getIapPublicKeys();
-        iapKeys = iapKeysResult.pubkeys
-      }
+      const assertion = req.header("X-Goog-IAP-JWT-Assertion")
+
+      const keys = await getIapKeys()
 
       const ticket = await oAuth2Client.verifySignedJwtWithCertsAsync(
-        assertion ?? '',
-        iapKeys,
+        assertion ?? "",
+        keys,
         req.args.audience,
-        ['https://cloud.google.com/iap']
-      );
-      const payload = ticket.getPayload();
+        ["https://cloud.google.com/iap"],
+      )
+      const payload = ticket.getPayload()
 
-      if (req.args.email ?? '') {
+      if (req.args.email ?? "") {
         if (payload?.email == req.args.email) {
-          return true;
+          return true
         }
-      } else if (payload?.email ?? '') {
-        return true;
+      } else if (payload?.email ?? "") {
+        return true
       }
 
-      return false;
+      return false
     }
     case AuthType.Password: {
       // The password is stored in the cookie after being hashed.
