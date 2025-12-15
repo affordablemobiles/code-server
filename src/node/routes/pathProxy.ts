@@ -14,7 +14,11 @@ const getProxyTarget = (
 ): string => {
   // If there is a base path, strip it out.
   const base = (req as any).base || ""
-  return `http://0.0.0.0:${req.params.port}${opts?.proxyBasePath || ""}/${req.originalUrl.slice(base.length)}`
+  const port = parseInt(req.params.port, 10)
+  if (isNaN(port)) {
+    throw new HttpError("Invalid port", HttpCode.BadRequest)
+  }
+  return `http://0.0.0.0:${port}${opts?.proxyBasePath || ""}/${req.originalUrl.slice(base.length)}`
 }
 
 export async function proxy(
@@ -27,7 +31,9 @@ export async function proxy(
 ): Promise<void> {
   ensureProxyEnabled(req)
 
-  if (!(await authenticated(req))) {
+  if (req.method === "OPTIONS" && req.args["skip-auth-preflight"]) {
+    // Allow preflight requests with `skip-auth-preflight` flag
+  } else if (!(await authenticated(req))) {
     // If visiting the root (/:port only) redirect to the login page.
     if ((req.args.auth != AuthType.GoogleIAP) && (!req.params.path || req.params.path === "/")) {
       const to = self(req)

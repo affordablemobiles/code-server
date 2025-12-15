@@ -25,15 +25,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code-server
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
 
       - name: Download npm package from release artifacts
-        uses: robinraju/release-downloader@v1.11
+        uses: robinraju/release-downloader@v1.12
         with:
           repository: "coder/code-server"
           tag: ${{ github.event.inputs.version || github.ref_name }}
@@ -53,38 +53,6 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_ENVIRONMENT: "production"
 
-  homebrew:
-    needs: npm
-    runs-on: ubuntu-latest
-    steps:
-      # Ensure things are up to date
-      # Suggested by homebrew maintainers
-      # https://github.com/Homebrew/discussions/discussions/1532#discussioncomment-782633
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Checkout code-server
-        uses: actions/checkout@v4
-
-      - name: Configure git
-        run: |
-          git config --global user.name cdrci
-          git config --global user.email opensource@coder.com
-
-      # Strip out the v (v4.9.1 -> 4.9.1).
-      - name: Get and set VERSION
-        run: |
-          TAG="${{ github.event.inputs.version || github.ref_name }}"
-          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
-
-      - name: Bump code-server homebrew version
-        env:
-          VERSION: ${{ env.VERSION }}
-          HOMEBREW_GITHUB_API_TOKEN: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
-
-        run: ./ci/steps/brew-bump.sh
-
   aur:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -94,13 +62,13 @@ jobs:
     steps:
       # We need to checkout code-server so we can get the version
       - name: Checkout code-server
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           path: "./code-server"
 
       - name: Checkout code-server-aur repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: "cdrci/code-server-aur"
           token: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
@@ -124,7 +92,7 @@ jobs:
           echo "VERSION=${TAG#v}" >> $GITHUB_ENV
 
       - name: Validate package
-        uses: heyhusen/archlinux-package-action@v2.2.1
+        uses: heyhusen/archlinux-package-action@v2.4.0
         env:
           VERSION: ${{ env.VERSION }}
         with:
@@ -145,10 +113,10 @@ jobs:
           gh pr create --repo coder/code-server-aur --title "chore: bump version to ${{ env.VERSION }}" --body "PR opened by @$GITHUB_ACTOR" --assignee $GITHUB_ACTOR
 
   docker:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code-server
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -176,7 +144,7 @@ jobs:
           echo "VERSION=${TAG#v}" >> $GITHUB_ENV
 
       - name: Download deb artifacts
-        uses: robinraju/release-downloader@v1.11
+        uses: robinraju/release-downloader@v1.12
         with:
           repository: "coder/code-server"
           tag: v${{ env.VERSION }}
@@ -184,7 +152,7 @@ jobs:
           out-file-path: "release-packages"
 
       - name: Download rpm artifacts
-        uses: robinraju/release-downloader@v1.11
+        uses: robinraju/release-downloader@v1.12
         with:
           repository: "coder/code-server"
           tag: v${{ env.VERSION }}

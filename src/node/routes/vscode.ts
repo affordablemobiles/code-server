@@ -4,8 +4,8 @@ import * as express from "express"
 import { promises as fs } from "fs"
 import * as http from "http"
 import * as net from "net"
-import * as path from "path"
 import * as os from "os"
+import * as path from "path"
 import { logError } from "../../common/util"
 import { CodeArgs, toCodeArgs } from "../cli"
 import { isDevMode, vsRootPath } from "../constants"
@@ -192,11 +192,22 @@ router.get("/manifest.json", async (req, res) => {
           display: "fullscreen",
           display_override: ["window-controls-overlay"],
           description: "Run Code on a remote server.",
-          icons: [192, 512].map((size) => ({
-            src: `{{BASE}}/_static/src/browser/media/pwa-icon-${size}.png`,
-            type: "image/png",
-            sizes: `${size}x${size}`,
-          })),
+          icons: [192, 512]
+            .map((size) => [
+              {
+                src: `{{BASE}}/_static/src/browser/media/pwa-icon-${size}.png`,
+                type: "image/png",
+                sizes: `${size}x${size}`,
+                purpose: "any",
+              },
+              {
+                src: `{{BASE}}/_static/src/browser/media/pwa-icon-maskable-${size}.png`,
+                type: "image/png",
+                sizes: `${size}x${size}`,
+                purpose: "maskable",
+              },
+            ])
+            .flat(),
         },
         null,
         2,

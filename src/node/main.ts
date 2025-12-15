@@ -1,15 +1,17 @@
 import { field, logger } from "@coder/logger"
 import http from "http"
+import * as os from "os"
 import * as path from "path"
 import { Disposable } from "../common/emitter"
 import { plural } from "../common/util"
 import { createApp, ensureAddress } from "./app"
 import { AuthType, DefaultedArgs, Feature, toCodeArgs, UserProvidedArgs } from "./cli"
 import { commit, version, vsRootPath } from "./constants"
+import { loadCustomStrings } from "./i18n"
 import { register } from "./routes"
 import { VSCodeModule } from "./routes/vscode"
 import { isDirectory, open } from "./util"
-import * as os from "os"
+import { wrapper } from "./wrapper"
 
 /**
  * Return true if the user passed an extension-related VS Code flag.
@@ -122,6 +124,12 @@ export const runCodeServer = async (
 ): Promise<{ dispose: Disposable["dispose"]; server: http.Server }> => {
   logger.info(`code-server ${version} ${commit}`)
 
+  // Load custom strings if provided
+  if (args.i18n) {
+    await loadCustomStrings(args.i18n)
+    logger.info("Loaded custom strings")
+  }
+
   logger.info(`Using user-data-dir ${args["user-data-dir"]}`)
   logger.debug(`Using extensions-dir ${args["extensions-dir"]}`)
 
@@ -134,7 +142,7 @@ export const runCodeServer = async (
   const app = await createApp(args)
   const protocol = args.cert ? "https" : "http"
   const serverAddress = ensureAddress(app.server, protocol)
-  const disposeRoutes = await register(app, args)
+  const { disposeRoutes, heart } = await register(app, args)
 
   logger.info(`Using config file ${args.config}`)
   logger.info(`${protocol.toUpperCase()} server listening on ${serverAddress.toString()}`)
@@ -144,6 +152,8 @@ export const runCodeServer = async (
       logger.info("    - Using password from $PASSWORD")
     } else if (args.usingEnvHashedPassword) {
       logger.info("    - Using password from $HASHED_PASSWORD")
+    } else if (args["hashed-password"]) {
+      logger.info(`    - Using hashed-password from ${args.config}`)
     } else {
       logger.info(`    - Using password from ${args.config}`)
     }
@@ -166,11 +176,35 @@ export const runCodeServer = async (
     logger.info("  - Not serving HTTPS")
   }
 
+  if (args["idle-timeout-seconds"]) {
+    logger.info(`  - Idle timeout set to ${args["idle-timeout-seconds"]} seconds`)
+
+    let idleShutdownTimer: NodeJS.Timeout | undefined
+    const startIdleShutdownTimer = () => {
+      idleShutdownTimer = setTimeout(() => {
+        logger.warn(`Idle timeout of ${args["idle-timeout-seconds"]} seconds exceeded`)
+        wrapper.exit(0)
+      }, args["idle-timeout-seconds"]! * 1000)
+    }
+
+    startIdleShutdownTimer()
+
+    heart.onChange((state) => {
+      clearTimeout(idleShutdownTimer)
+      if (state === "expired") {
+        startIdleShutdownTimer()
+      }
+    })
+  }
+
   if (args["disable-proxy"]) {
     logger.info("  - Proxy disabled")
   } else if (args["proxy-domain"].length > 0) {
     logger.info(`  - ${plural(args["proxy-domain"].length, "Proxying the following domain")}:`)
     args["proxy-domain"].forEach((domain) => logger.info(`    - ${domain}`))
+  }
+  if (args["skip-auth-preflight"]) {
+    logger.info("  - Skipping authentication for preflight requests")
   }
   if (process.env.VSCODE_PROXY_URI) {
     logger.info(`Using proxy URI in PORTS tab: ${process.env.VSCODE_PROXY_URI}`)

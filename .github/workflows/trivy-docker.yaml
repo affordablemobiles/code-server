@@ -44,14 +44,14 @@ concurrency:
 
 jobs:
   trivy-scan-image:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Run Trivy vulnerability scanner in image mode
-        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           image-ref: "docker.io/codercom/code-server:latest"
           ignore-unfixed: true

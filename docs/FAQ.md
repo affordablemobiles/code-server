@@ -31,6 +31,7 @@
 - [What's the difference between code-server and Theia?](#whats-the-difference-between-code-server-and-theia)
 - [What's the difference between code-server and OpenVSCode-Server?](#whats-the-difference-between-code-server-and-openvscode-server)
 - [What's the difference between code-server and GitHub Codespaces?](#whats-the-difference-between-code-server-and-github-codespaces)
+- [What's the difference between code-server and VS Code web?](#whats-the-difference-between-code-server-and-vs-code-web)
 - [Does code-server have any security login validation?](#does-code-server-have-any-security-login-validation)
 - [Are there community projects involving code-server?](#are-there-community-projects-involving-code-server)
 - [How do I change the port?](#how-do-i-change-the-port)
@@ -322,12 +323,8 @@ As long as there is an active browser connection, code-server touches
 `~/.local/share/code-server/heartbeat` once a minute.
 
 If you want to shutdown code-server if there hasn't been an active connection
-after a predetermined amount of time, you can do so by checking continuously for
-the last modified time on the heartbeat file. If it is older than X minutes (or
-whatever amount of time you'd like), you can kill code-server.
-
-Eventually, [#1636](https://github.com/coder/code-server/issues/1636) will make
-this process better.
+after a predetermined amount of time, you can use the --idle-timeout-seconds flag
+or set an `CODE_SERVER_IDLE_TIMEOUT_SECONDS` environment variable.
 
 ## How do I change the password?
 
@@ -382,6 +379,9 @@ You can even make volume mounts work. Let's say you want to run a container and
 mount into `/home/coder/myproject` from inside the `code-server` container. You
 need to make sure the Docker daemon's `/home/coder/myproject` is the same as the
 one mounted inside the `code-server` container, and the mount will work.
+
+If you want Docker enabled when deploying on Kubernetes, look at the `values.yaml`
+file for the 3 fields: `extraVars`, `lifecycle.postStart`, and `extraContainers`.
 
 ## How do I disable telemetry?
 
@@ -440,6 +440,8 @@ Specific changes include:
 - The ability to use your own marketplace and collect your own telemetry
 - Built-in proxy for accessing ports on the remote machine integrated into
   VS Code's ports panel
+- Settings are stored on disk like desktop VS Code, instead of in browser
+  storage (note that state is still stored in browser storage).
 - Wrapper process that spawns VS Code on-demand and has a separate CLI
 - Notification when updates are available
 - [Some other things](https://github.com/coder/code-server/tree/main/patches)
@@ -447,6 +449,12 @@ Specific changes include:
 Some of these changes appear very unlikely to ever be adopted by Microsoft.
 Some may make their way upstream, further closing the gap, but at the moment it
 looks like there will always be some subtle differences.
+
+## What's the difference between code-server and VS Code web?
+
+VS Code web (which can be ran using `code serve-web`) has the same differences
+as the Codespaces section above. VS Code web can be a better choice if you need
+access to the official Microsoft marketplace.
 
 ## Does code-server have any security login validation?
 

@@ -22,6 +22,258 @@ Code v99.99.999
 
 ## Unreleased
 
+Code v1.107.0
+
+### Changed
+
+- Update to Code 1.107.0
+
+### Added
+
+- New `--cookie-suffix` flag that can be used to add a suffix to the cookie when
+  using the built-in password authentication. You can use this to avoid
+  collisions with other instances of code-server.
+- Support a new property `authorizationHeaderToken` on the extension gallery
+  configuration. This will be added to marketplace requests as a bearer token
+  using the `Authorization` header.
+
+## [4.106.3](https://github.com/coder/code-server/releases/tag/v4.106.3) - 2025-12-01
+
+Code v1.106.3
+
+### Changed
+
+- Update to Code 1.106.3
+
+## [4.106.2](https://github.com/coder/code-server/releases/tag/v4.106.2) - 2025-11-19
+
+Code v1.106.2
+
+### Changed
+
+- Update to Code 1.106.2
+
+## [4.106.0](https://github.com/coder/code-server/releases/tag/v4.106.0) - 2025-11-19
+
+Code v1.106.0
+
+### Changed
+
+- Update to Code 1.106.0
+
+## [4.105.1](https://github.com/coder/code-server/releases/tag/v4.105.1) - 2025-10-20
+
+Code v1.105.1
+
+### Changed
+
+- Update to Code 1.105.1
+
+## [4.105.0](https://github.com/coder/code-server/releases/tag/v4.105.0) - 2025-10-17
+
+Code v1.105.0
+
+### Changed
+
+- Update to Code 1.105.0
+
+## [4.104.3](https://github.com/coder/code-server/releases/tag/v4.104.3) - 2025-10-07
+
+Code v1.104.3
+
+### Changed
+
+- Update to Code 1.104.3.
+
+## [4.104.2](https://github.com/coder/code-server/releases/tag/v4.104.2) - 2025-09-26
+
+Code v1.104.2
+
+### Changed
+
+- Update to Code 1.104.2.
+
+## [4.104.1](https://github.com/coder/code-server/releases/tag/v4.104.1) - 2025-09-19
+
+Code v1.104.1
+
+### Changed
+
+- Update to Code 1.104.1.
+
+## [4.104.0](https://github.com/coder/code-server/releases/tag/v4.104.0) - 2025-09-15
+
+Code v1.104.0
+
+### Fixed
+
+- Fix "extension not found" errors from Open VSX when trying to install the
+  latest version of an extension.
+
+### Changed
+
+- Update to Code 1.104.0.
+
+## [4.103.2](https://github.com/coder/code-server/releases/tag/v4.103.2) - 2025-08-25
+
+Code v1.103.2
+
+### Changed
+
+- Update to Code 1.103.2.
+
+## [4.103.1](https://github.com/coder/code-server/releases/tag/v4.103.1) - 2025-08-15
+
+Code v1.103.1
+
+### Changed
+
+- Update to Code 1.103.1.
+
+## [4.103.0](https://github.com/coder/code-server/releases/tag/v4.103.0) - 2025-08-12
+
+Code v1.103.0
+
+### Changed
+
+- Update to Code 1.103.0.
+
+## [4.102.2](https://github.com/coder/code-server/releases/tag/v4.102.2) - 2025-07-24
+
+Code v1.102.2
+
+### Changed
+
+- Update to Code 1.102.2.
+
+## [4.102.1](https://github.com/coder/code-server/releases/tag/v4.102.1) - 2025-07-17
+
+Code v1.102.1
+
+### Changed
+
+- Update to Code 1.102.1.
+
+## [4.102.0](https://github.com/coder/code-server/releases/tag/v4.102.0) - 2025-07-16
+
+Code v1.102.0
+
+### Changed
+
+- Update to Code 1.102.0.
+
+### Added
+
+- Custom strings can be configured using the `--i18n` flag set to a JSON
+  file. This can be used for either translation (and can be used alongside
+  `--locale`) or for customizing the strings. See
+  [./src/node/i18n/locales/en.json](./src/node/i18n/locales/en.json) for the
+  available keys.
+
+## [4.101.2](https://github.com/coder/code-server/releases/tag/v4.101.2) - 2025-06-25
+
+Code v1.101.2
+
+### Changed
+
+- Update to Code 1.101.2.
+
+### Fixed
+
+- Fix web views not loading due to 401 when requesting the service worker.
+
+## [4.101.1](https://github.com/coder/code-server/releases/tag/v4.101.1) - 2025-06-20
+
+Code v1.101.1
+
+### Changed
+
+- Update to Code 1.101.1.
+
+## [4.101.0](https://github.com/coder/code-server/releases/tag/v4.101.0) - 2025-06-20
+
+Code v1.101.0
+
+### Changed
+
+- Update to Code 1.101.0.
+
+## [4.100.3](https://github.com/coder/code-server/releases/tag/v4.100.3) - 2025-06-03
+
+Code v1.100.3
+
+### Changed
+
+- Update to Code 1.100.3.
+
+## [4.100.2](https://github.com/coder/code-server/releases/tag/v4.100.2) - 2025-05-15
+
+Code v1.100.2
+
+### Changed
+
+- Update to Code 1.100.2.
+
+## [4.100.1](https://github.com/coder/code-server/releases/tag/v4.100.1) - 2025-05-13
+
+Code v1.100.1
+
+### Changed
+
+- Update to Code 1.100.1.
+
+## [4.100.0](https://github.com/coder/code-server/releases/tag/v4.100.0) - 2025-05-12
+
+Code v1.100.0
+
+### Added
+
+- Trusted domains for links can now be set at run-time by configuring
+  `linkProtectionTrustedDomains` in the `lib/vscode/product.json` file or via
+  the `--link-protection-trusted-domains` flag.
+
+### Changed
+
+- Update to Code 1.100.0.
+- Disable extension signature verification, which previously was skipped by
+  default (the package used for verification is not available to OSS builds of
+  VS Code) but now reportedly throws hard errors making it impossible to install
+  extensions.
+
+### Fixed
+
+- Flags with repeatable options now work via the config file.
+
+## [4.99.4](https://github.com/coder/code-server/releases/tag/v4.99.4) - 2025-05-02
+
+Code v1.99.3
+
+### Security
+
+- Validate that ports in the path proxy are numbers, to prevent proxying to
+  arbitrary domains.
+
+## [4.99.3](https://github.com/coder/code-server/releases/tag/v4.99.3) - 2025-04-17
+
+Code v1.99.3
+
+### Added
+
+- Added `--skip-auth-preflight` flag to let preflight requests through the
+  proxy.
+
+### Changed
+
+- Update to Code 1.99.3.
+
+## [4.99.2](https://github.com/coder/code-server/releases/tag/v4.99.2) - 2025-04-10
+
+Code v1.99.2
+
+### Changed
+
+- Update to Code 1.99.2.
+
 ## [4.99.1](https://github.com/coder/code-server/releases/tag/v4.99.1) - 2025-04-08
 
 Code v1.99.1
@@ -674,7 +926,6 @@ Code v1.68.1
   would be accessible at `my.domain/proxy/8000/` without any authentication.
 
   If all of the following apply to you please update as soon as possible:
-
   - You run code-server with the built-in password authentication.
   - You run unprotected HTTP services on ports accessible by code-server.
 

@@ -10,10 +10,11 @@
     flake-utils.lib.eachDefaultSystem
       (system:
         let pkgs = nixpkgs.legacyPackages.${system};
-            nodejs = pkgs.nodejs_20;
+            nodejs = pkgs.nodejs_22;
         in {
           devShells.default = pkgs.mkShell {
             nativeBuildInputs = with pkgs; [
+              imagemagick
               nodejs
               python3
               pkg-config

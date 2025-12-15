@@ -31,7 +31,7 @@ export enum LogLevel {
 export class OptionalString extends Optional<string> {}
 
 /**
- * Code flags provided by the user.
+ * (VS) Code flags provided by the user.
  */
 export interface UserProvidedCodeArgs {
   "disable-telemetry"?: boolean
@@ -54,7 +54,10 @@ export interface UserProvidedCodeArgs {
   "disable-getting-started-override"?: boolean
   "disable-proxy"?: boolean
   "session-socket"?: string
-  "abs-proxy-base-path"?: string
+  "cookie-suffix"?: string
+  "link-protection-trusted-domains"?: string[]
+  // locale is used by both VS Code and code-server.
+  locale?: string
 }
 
 /**
@@ -76,7 +79,6 @@ export interface UserProvidedArgs extends UserProvidedCodeArgs {
   enable?: string[]
   help?: boolean
   host?: string
-  locale?: string
   port?: number
   json?: boolean
   log?: LogLevel
@@ -87,12 +89,16 @@ export interface UserProvidedArgs extends UserProvidedCodeArgs {
   "trusted-origins"?: string[]
   version?: boolean
   "proxy-domain"?: string[]
+  "skip-auth-preflight"?: boolean
   "reuse-window"?: boolean
   "new-window"?: boolean
   "ignore-last-opened"?: boolean
   verbose?: boolean
   "app-name"?: string
   "welcome-text"?: string
+  "abs-proxy-base-path"?: string
+  i18n?: string
+  "idle-timeout-seconds"?: number
   /* Positional arguments. */
   _?: string[]
 }
@@ -178,6 +184,12 @@ export const options: Options<Required<UserProvidedArgs>> = {
   "session-socket": {
     type: "string",
   },
+  "cookie-suffix": {
+    type: "string",
+    description:
+      "Adds a suffix to the cookie. This can prevent a collision of cookies for subdomains, making them explixit. \n" +
+      "Without this flag, no suffix is used. This can also be set with CODE_SERVER_COOKIE_SUFFIX set to any string.",
+  },
   "disable-file-downloads": {
     type: "boolean",
     description:
@@ -204,6 +216,10 @@ export const options: Options<Required<UserProvidedArgs>> = {
   enable: { type: "string[]" },
   help: { type: "boolean", short: "h", description: "Show this output." },
   json: { type: "boolean" },
+  "link-protection-trusted-domains": {
+    type: "string[]",
+    description: "Links matching a trusted domain can be opened without link protection.",
+  },
   locale: {
     // The preferred way to set the locale is via the UI.
     type: "string",
@@ -263,6 +279,10 @@ export const options: Options<Required<UserProvidedArgs>> = {
     description: "GitHub authentication token (can only be passed in via $GITHUB_TOKEN or the config file).",
   },
   "proxy-domain": { type: "string[]", description: "Domain used for proxying ports." },
+  "skip-auth-preflight": {
+    type: "boolean",
+    description: "Allows preflight requests through proxy without authentication.",
+  },
   "ignore-last-opened": {
     type: "boolean",
     short: "e",
@@ -284,16 +304,27 @@ export const options: Options<Required<UserProvidedArgs>> = {
   "app-name": {
     type: "string",
     short: "an",
-    description: "The name to use in branding. Will be shown in titlebar and welcome message",
+    description:
+      "Will replace the {{app}} placeholder in any strings, which by default includes the title bar and welcome message",
   },
   "welcome-text": {
     type: "string",
     short: "w",
     description: "Text to show on login page",
+    deprecated: true,
   },
   "abs-proxy-base-path": {
     type: "string",
     description: "The base path to prefix to all absproxy requests",
+  },
+  i18n: {
+    type: "string",
+    path: true,
+    description: "Path to JSON file with custom translations. Merges with default strings and supports all i18n keys.",
+  },
+  "idle-timeout-seconds": {
+    type: "number",
+    description: "Timeout in seconds to wait before shutting down when idle.",
   },
 }
 
@@ -386,6 +417,10 @@ export const parse = (
 
       if (key === "github-auth" && !opts?.configFile) {
         throw new Error("--github-auth can only be set in the config file or passed in via $GITHUB_TOKEN")
+      }
+
+      if (key === "idle-timeout-seconds" && Number(value) <= 60) {
+        throw new Error("--idle-timeout-seconds must be greater than 60 seconds.")
       }
 
       const option = options[key]
@@ -599,8 +634,22 @@ export async function setDefaults(cliArgs: UserProvidedArgs, configArgs?: Config
     usingEnvPassword = false
   }
 
+  if (process.env.CODE_SERVER_COOKIE_SUFFIX) {
+    args["cookie-suffix"] = process.env.CODE_SERVER_COOKIE_SUFFIX
+  }
+
   if (process.env.GITHUB_TOKEN) {
     args["github-auth"] = process.env.GITHUB_TOKEN
+  }
+
+  if (process.env.CODE_SERVER_IDLE_TIMEOUT_SECONDS) {
+    if (isNaN(Number(process.env.CODE_SERVER_IDLE_TIMEOUT_SECONDS))) {
+      logger.info("CODE_SERVER_IDLE_TIMEOUT_SECONDS must be a number")
+    }
+    if (Number(process.env.CODE_SERVER_IDLE_TIMEOUT_SECONDS) <= 60) {
+      throw new Error("--idle-timeout-seconds must be greater than 60 seconds.")
+    }
+    args["idle-timeout-seconds"] = Number(process.env.CODE_SERVER_IDLE_TIMEOUT_SECONDS)
   }
 
   // Ensure they're not readable by child processes.
@@ -713,12 +762,16 @@ export function parseConfigFile(configFile: string, configPath: string): ConfigA
 
   // We convert the config file into a set of flags.
   // This is a temporary measure until we add a proper CLI library.
-  const configFileArgv = Object.entries(config).map(([optName, opt]) => {
-    if (opt === true) {
-      return `--${optName}`
-    }
-    return `--${optName}=${opt}`
-  })
+  const configFileArgv = Object.entries(config)
+    .map(([optName, opt]) => {
+      if (opt === true) {
+        return `--${optName}`
+      } else if (Array.isArray(opt)) {
+        return opt.map((o) => `--${optName}=${o}`)
+      }
+      return `--${optName}=${opt}`
+    })
+    .flat()
   const args = parse(configFileArgv, {
     configFile: configPath,
   })
