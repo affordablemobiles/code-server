@@ -44,11 +44,79 @@ rsync() {
   command rsync -a --del "$@"
 }
 
-ARCH="$(arch)"
-export ARCH
-OS=$(os)
-export OS
+if [[ ! ${ARCH-} ]]; then
+  ARCH=$(arch)
+  export ARCH
+fi
+
+if [[ ! ${OS-} ]]; then
+  OS=$(os)
+  export OS
+fi
 
 # RELEASE_PATH is the destination directory for the release from the root.
 # Defaults to release
-RELEASE_PATH="${RELEASE_PATH-release}"
+if [[ ! ${RELEASE_PATH-} ]]; then
+  RELEASE_PATH="release"
+  export RELEASE_PATH
+fi
+
+nodeOS() {
+  osname=$OS
+  case $osname in
+    macos) osname=darwin ;;
+    windows) osname=win32 ;;
+  esac
+  echo "$osname"
+}
+
+nodeArch() {
+  cpu=$ARCH
+  case $cpu in
+    amd64) cpu=x64 ;;
+  esac
+  echo "$cpu"
+}
+
+run-steps() {
+  local -i failed=0
+  mkdir -p .cache
+  rm -f .cache/checklist
+  while (( $# )) ; do
+    local name=$1 ; shift
+    local fn=$1 ; shift
+    # Only run if an earlier step has not failed.
+    if [[ $failed == 0 ]] ; then
+      echo "$name..."
+      if $fn | indent ; then
+        echo "- [X] $name" >> .cache/checklist
+      else
+        ((failed++))
+      fi
+    fi
+    # For all failed steps, write out an empty checkbox.
+    if [[ $failed != 0 ]] ; then
+      echo "- [ ] $name" >> .cache/checklist
+    fi
+  done
+  if [[ $failed != 0 ]] ; then
+    return 1
+  fi
+}
+
+quiet() {
+  "$@" >/dev/null
+}
+
+indent() {
+  local count=2
+  local space
+  space=$(printf "%${count}s")
+  sed "s/^/$space| /g"
+}
+
+# See gulpfile.reh.ts for available targets.
+if [[ ! ${VSCODE_TARGET-} ]]; then
+  VSCODE_TARGET="$(nodeOS)-$(nodeArch)"
+  export VSCODE_TARGET
+fi

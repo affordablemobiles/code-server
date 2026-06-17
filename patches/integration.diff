@@ -48,7 +48,7 @@ Index: code-server/lib/vscode/src/vs/server/node/server.main.ts
 -[REMOTE_DATA_FOLDER, args['extensions-dir'], USER_DATA_PATH, APP_SETTINGS_HOME, MACHINE_SETTINGS_HOME, GLOBAL_STORAGE_HOME, LOCAL_HISTORY_HOME].forEach(f => {
 -	try {
 -		if (!fs.existsSync(f)) {
--			fs.mkdirSync(f, { mode: 0o700 });
+-			fs.mkdirSync(f, { mode: 0o700, recursive: true });
 -		}
 -	} catch (err) { console.error(err); }
 -});
@@ -68,7 +68,7 @@ Index: code-server/lib/vscode/src/vs/server/node/server.main.ts
 +	[REMOTE_DATA_FOLDER, args['extensions-dir'], USER_DATA_PATH, APP_SETTINGS_HOME, MACHINE_SETTINGS_HOME, GLOBAL_STORAGE_HOME, LOCAL_HISTORY_HOME].forEach(f => {
 +		try {
 +			if (!fs.existsSync(f)) {
-+				fs.mkdirSync(f, { mode: 0o700 });
++				fs.mkdirSync(f, { mode: 0o700, recursive: true });
 +			}
 +		} catch (err) { console.error(err); }
 +	});
@@ -164,7 +164,7 @@ Index: code-server/lib/vscode/src/vs/workbench/browser/web.main.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/workbench/browser/web.main.ts
 +++ code-server/lib/vscode/src/vs/workbench/browser/web.main.ts
-@@ -64,6 +64,7 @@ import { IOpenerService } from '../../pl
+@@ -65,6 +65,7 @@ import { IOpenerService } from '../../pl
  import { mixin, safeStringify } from '../../base/common/objects.js';
  import { IndexedDB } from '../../base/browser/indexedDB.js';
  import { WebFileSystemAccess } from '../../platform/files/browser/webFileSystemAccess.js';
@@ -172,7 +172,7 @@ Index: code-server/lib/vscode/src/vs/workbench/browser/web.main.ts
  import { IProgressService } from '../../platform/progress/common/progress.js';
  import { DelayedLogChannel } from '../services/output/common/delayedLogChannel.js';
  import { dirname, joinPath } from '../../base/common/resources.js';
-@@ -133,6 +134,9 @@ export class BrowserMain extends Disposa
+@@ -140,6 +141,9 @@ export class BrowserMain extends Disposa
  		// Startup
  		const instantiationService = workbench.startup();
  
@@ -251,7 +251,7 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/webClientServer.ts
 +++ code-server/lib/vscode/src/vs/server/node/webClientServer.ts
-@@ -333,6 +333,7 @@ export class WebClientServer {
+@@ -353,6 +353,7 @@ export class WebClientServer {
  		} : undefined;
  
  		const productConfiguration: Partial<Mutable<IProductConfiguration>> = {
@@ -304,11 +304,11 @@ Index: code-server/lib/vscode/src/server-main.ts
 +if (!process.env.CODE_SERVER_PARENT_PID) {
 +	start();
 +}
-Index: code-server/lib/vscode/src/vs/platform/dialogs/browser/dialog.ts
+Index: code-server/lib/vscode/src/vs/workbench/browser/parts/dialogs/dialog.ts
 ===================================================================
---- code-server.orig/lib/vscode/src/vs/platform/dialogs/browser/dialog.ts
-+++ code-server/lib/vscode/src/vs/platform/dialogs/browser/dialog.ts
-@@ -45,8 +45,11 @@ export function createWorkbenchDialogOpt
+--- code-server.orig/lib/vscode/src/vs/workbench/browser/parts/dialogs/dialog.ts
++++ code-server/lib/vscode/src/vs/workbench/browser/parts/dialogs/dialog.ts
+@@ -47,8 +47,11 @@ export function createWorkbenchDialogOpt
  
  export function createBrowserAboutDialogDetails(productService: IProductService): { title: string; details: string; detailsToCopy: string } {
  	const detailString = (useAgo: boolean): string => {
