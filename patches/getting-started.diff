@@ -201,7 +201,7 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/webClientServer.ts
 +++ code-server/lib/vscode/src/vs/server/node/webClientServer.ts
-@@ -393,6 +393,7 @@ export class WebClientServer {
+@@ -387,6 +387,7 @@ export class WebClientServer {
  			userDataPath: this._environmentService.userDataPath,
  			isEnabledFileDownloads: !this._environmentService.args['disable-file-downloads'],
  			isEnabledFileUploads: !this._environmentService.args['disable-file-uploads'],
@@ -222,7 +222,7 @@ Index: code-server/lib/vscode/src/vs/workbench/browser/contextkeys.ts
  import { preferredSideBySideGroupDirection, GroupDirection, IEditorGroupsService } from '../services/editor/common/editorGroupsService.js';
  import { IConfigurationService } from '../../platform/configuration/common/configuration.js';
  import { IBrowserWorkbenchEnvironmentService } from '../services/environment/browser/environmentService.js';
-@@ -204,6 +204,7 @@ export class WorkbenchContextKeysHandler
+@@ -205,6 +205,7 @@ export class WorkbenchContextKeysHandler
  		// code-server
  		IsEnabledFileDownloads.bindTo(this.contextKeyService).set(this.environmentService.isEnabledFileDownloads ?? true)
  		IsEnabledFileUploads.bindTo(this.contextKeyService).set(this.environmentService.isEnabledFileUploads ?? true)
