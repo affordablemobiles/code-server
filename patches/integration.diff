@@ -164,7 +164,7 @@ Index: code-server/lib/vscode/src/vs/workbench/browser/web.main.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/workbench/browser/web.main.ts
 +++ code-server/lib/vscode/src/vs/workbench/browser/web.main.ts
-@@ -65,6 +65,7 @@ import { IOpenerService } from '../../pl
+@@ -64,6 +64,7 @@ import { IOpenerService } from '../../pl
  import { mixin, safeStringify } from '../../base/common/objects.js';
  import { IndexedDB } from '../../base/browser/indexedDB.js';
  import { WebFileSystemAccess } from '../../platform/files/browser/webFileSystemAccess.js';
@@ -186,8 +186,8 @@ Index: code-server/lib/vscode/src/vs/base/common/product.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/base/common/product.ts
 +++ code-server/lib/vscode/src/vs/base/common/product.ts
-@@ -65,6 +65,8 @@ export type ExtensionVirtualWorkspaceSup
- };
+@@ -97,6 +97,8 @@ export interface IDictationRuntimeProduc
+ }
  
  export interface IProductConfiguration {
 +	readonly codeServerVersion?: string
@@ -257,13 +257,13 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
  		const productConfiguration: Partial<Mutable<IProductConfiguration>> = {
 +			codeServerVersion: this._productService.codeServerVersion,
  			embedderIdentifier: 'server-distro',
+ 			voiceWsUrl: this._productService.voiceWsUrl,
  			extensionsGallery: this._webExtensionResourceUrlTemplate && this._productService.extensionsGallery ? {
- 				...this._productService.extensionsGallery,
 Index: code-server/lib/vscode/src/server-main.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/server-main.ts
 +++ code-server/lib/vscode/src/server-main.ts
-@@ -22,6 +22,9 @@ import { IServerAPI } from './vs/server/
+@@ -23,6 +23,9 @@ import { IServerAPI } from './vs/server/
  perf.mark('code/server/start');
  (globalThis as { vscodeServerStartTime?: number }).vscodeServerStartTime = performance.now();
  
@@ -273,7 +273,7 @@ Index: code-server/lib/vscode/src/server-main.ts
  // Do a quick parse to determine if a server or the cli needs to be started
  const parsedArgs = minimist(process.argv.slice(2), {
  	boolean: ['start-server', 'list-extensions', 'print-ip-address', 'help', 'version', 'accept-server-license-terms', 'update-extensions'],
-@@ -150,6 +153,7 @@ if (shouldSpawnCli) {
+@@ -153,6 +156,7 @@ if (shouldSpawnCli) {
  		}
  	});
  }
@@ -281,7 +281,7 @@ Index: code-server/lib/vscode/src/server-main.ts
  
  function sanitizeStringArg(val: unknown): string | undefined {
  	if (Array.isArray(val)) { // if an argument is passed multiple times, minimist creates an array
-@@ -283,3 +287,22 @@ function prompt(question: string): Promi
+@@ -406,3 +410,22 @@ function prompt(question: string): Promi
  		});
  	});
  }
