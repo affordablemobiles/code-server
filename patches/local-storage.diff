@@ -18,7 +18,7 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/webClientServer.ts
 +++ code-server/lib/vscode/src/vs/server/node/webClientServer.ts
-@@ -384,6 +384,7 @@ export class WebClientServer {
+@@ -420,6 +420,7 @@ export class WebClientServer {
  			remoteAuthority,
  			serverBasePath: basePath,
  			webviewEndpoint: staticRoute + '/out/vs/workbench/contrib/webview/browser/pre',
@@ -30,7 +30,7 @@ Index: code-server/lib/vscode/src/vs/workbench/browser/web.api.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/workbench/browser/web.api.ts
 +++ code-server/lib/vscode/src/vs/workbench/browser/web.api.ts
-@@ -307,6 +307,11 @@ export interface IWorkbenchConstructionO
+@@ -314,6 +314,11 @@ export interface IWorkbenchConstructionO
  	 */
  	readonly configurationDefaults?: Record<string, unknown>;
  
@@ -46,7 +46,7 @@ Index: code-server/lib/vscode/src/vs/workbench/services/environment/browser/envi
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/workbench/services/environment/browser/environmentService.ts
 +++ code-server/lib/vscode/src/vs/workbench/services/environment/browser/environmentService.ts
-@@ -102,7 +102,14 @@ export class BrowserWorkbenchEnvironment
+@@ -107,7 +107,14 @@ export class BrowserWorkbenchEnvironment
  	get logFile(): URI { return joinPath(this.windowLogsPath, 'window.log'); }
  
  	@memoize

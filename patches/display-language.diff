@@ -9,16 +9,16 @@ Index: code-server/lib/vscode/src/vs/server/node/serverServices.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/serverServices.ts
 +++ code-server/lib/vscode/src/vs/server/node/serverServices.ts
-@@ -12,7 +12,7 @@ import * as path from '../../base/common
- import { IURITransformer } from '../../base/common/uriIpc.js';
+@@ -13,7 +13,7 @@ import { IURITransformer } from '../../b
+ import { generateUuid } from '../../base/common/uuid.js';
  import { getMachineId, getSqmMachineId, getDevDeviceId } from '../../base/node/id.js';
  import { Promises } from '../../base/node/pfs.js';
 -import { ClientConnectionEvent, IMessagePassingProtocol, IPCServer, StaticRouter } from '../../base/parts/ipc/common/ipc.js';
 +import { ClientConnectionEvent, IMessagePassingProtocol, IPCServer, ProxyChannel, StaticRouter } from '../../base/parts/ipc/common/ipc.js';
  import { ProtocolConstants } from '../../base/parts/ipc/common/ipc.net.js';
+ import { createRandomIPCHandle } from '../../base/parts/ipc/node/ipc.net.js';
  import { IConfigurationService } from '../../platform/configuration/common/configuration.js';
- import { ConfigurationService } from '../../platform/configuration/common/configurationService.js';
-@@ -359,6 +359,9 @@ export async function setupServerService
+@@ -418,6 +418,9 @@ export async function setupServerService
  
  		socketServer.registerChannel('mcpManagement', new McpManagementChannel(mcpManagementService, (ctx: RemoteAgentConnectionContext) => getUriTransformer(ctx.remoteAuthority)));
  
@@ -153,7 +153,7 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/webClientServer.ts
 +++ code-server/lib/vscode/src/vs/server/node/webClientServer.ts
-@@ -25,6 +25,7 @@ import { URI } from '../../base/common/u
+@@ -24,6 +24,7 @@ import { URI } from '../../base/common/u
  import { streamToBuffer } from '../../base/common/buffer.js';
  import { IProductConfiguration } from '../../base/common/product.js';
  import { isString, Mutable } from '../../base/common/types.js';
@@ -161,7 +161,7 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
  import { CharCode } from '../../base/common/charCode.js';
  import { IExtensionManifest } from '../../platform/extensions/common/extensions.js';
  import { ICSSDevelopmentService } from '../../platform/cssDev/node/cssDevService.js';
-@@ -405,14 +406,22 @@ export class WebClientServer {
+@@ -442,14 +443,22 @@ export class WebClientServer {
  		};
  
  		const cookies = cookie.parse(req.headers.cookie || '');
@@ -171,7 +171,7 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
  		let WORKBENCH_NLS_URL: string;
  		if (!locale.startsWith('en') && this._productService.nlsCoreBaseUrl) {
  			WORKBENCH_NLS_BASE_URL = this._productService.nlsCoreBaseUrl;
- 			WORKBENCH_NLS_URL = `${WORKBENCH_NLS_BASE_URL}${this._productService.commit}/${this._productService.version}/${locale}/nls.messages.js`;
+ 			WORKBENCH_NLS_URL = createNlsUrl(WORKBENCH_NLS_BASE_URL, this._productService.commit, this._productService.version, locale);
  		} else {
 -			WORKBENCH_NLS_URL = ''; // fallback will apply
 +			try {
@@ -181,16 +181,16 @@ Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 +					: '';
 +			} catch (error) {
 +				console.error("Failed to generate translations", error);
-+				WORKBENCH_NLS_URL = '';
++				WORKBENCH_NLS_URL = ''; // fallback will apply
 +			}
  		}
  
- 		const values: { [key: string]: string } = {
+ 		const scriptNonce = createScriptNonce();
 Index: code-server/lib/vscode/src/vs/server/node/serverEnvironmentService.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/serverEnvironmentService.ts
 +++ code-server/lib/vscode/src/vs/server/node/serverEnvironmentService.ts
-@@ -22,6 +22,7 @@ export const serverOptions: OptionDescri
+@@ -38,6 +38,7 @@ export const serverOptions: OptionDescri
  	'disable-file-downloads': { type: 'boolean' },
  	'disable-file-uploads': { type: 'boolean' },
  	'disable-getting-started-override': { type: 'boolean' },
@@ -198,7 +198,7 @@ Index: code-server/lib/vscode/src/vs/server/node/serverEnvironmentService.ts
  
  	/* ----- server setup ----- */
  
-@@ -120,6 +121,7 @@ export interface ServerParsedArgs {
+@@ -136,6 +137,7 @@ export interface ServerParsedArgs {
  	'disable-file-downloads'?: boolean;
  	'disable-file-uploads'?: boolean;
  	'disable-getting-started-override'?: boolean,
@@ -272,7 +272,7 @@ Index: code-server/lib/vscode/src/vs/workbench/contrib/extensions/browser/extens
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
 +++ code-server/lib/vscode/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
-@@ -474,9 +474,6 @@ export class InstallAction extends Exten
+@@ -475,9 +475,6 @@ export class InstallAction extends Exten
  		if (this.extension.isBuiltin) {
  			return;
  		}
@@ -282,7 +282,7 @@ Index: code-server/lib/vscode/src/vs/workbench/contrib/extensions/browser/extens
  		if (this.extension.state !== ExtensionState.Uninstalled) {
  			return;
  		}
-@@ -781,7 +778,7 @@ export abstract class InstallInOtherServ
+@@ -782,7 +779,7 @@ export abstract class InstallInOtherServ
  		}
  
  		if (isLanguagePackExtension(this.extension.local.manifest)) {
@@ -291,7 +291,7 @@ Index: code-server/lib/vscode/src/vs/workbench/contrib/extensions/browser/extens
  		}
  
  		// Prefers to run on UI
-@@ -2284,17 +2281,6 @@ export class SetLanguageAction extends E
+@@ -2281,17 +2278,6 @@ export class SetLanguageAction extends E
  	update(): void {
  		this.enabled = false;
  		this.class = SetLanguageAction.DisabledClass;
@@ -309,7 +309,7 @@ Index: code-server/lib/vscode/src/vs/workbench/contrib/extensions/browser/extens
  	}
  
  	override async run(): Promise<any> {
-@@ -2311,7 +2297,6 @@ export class ClearLanguageAction extends
+@@ -2308,7 +2294,6 @@ export class ClearLanguageAction extends
  	private static readonly DisabledClass = `${this.EnabledClass} disabled`;
  
  	constructor(
@@ -317,7 +317,7 @@ Index: code-server/lib/vscode/src/vs/workbench/contrib/extensions/browser/extens
  		@ILocaleService private readonly localeService: ILocaleService,
  	) {
  		super(ClearLanguageAction.ID, ClearLanguageAction.TITLE.value, ClearLanguageAction.DisabledClass, false);
-@@ -2321,17 +2306,6 @@ export class ClearLanguageAction extends
+@@ -2318,17 +2303,6 @@ export class ClearLanguageAction extends
  	update(): void {
  		this.enabled = false;
  		this.class = ClearLanguageAction.DisabledClass;

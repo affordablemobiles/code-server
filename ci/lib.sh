@@ -49,7 +49,10 @@ if [[ ! ${ARCH-} ]]; then
   export ARCH
 fi
 
-if [[ ! ${OS-} ]]; then
+# Windows predefines OS as Windows_NT for every process, so on a windows shell
+# the check below would always find a value and never call os(). That is not a
+# name this build knows, so it does not count as one the caller chose.
+if [[ ! ${OS-} || ${OS-} == "Windows_NT" ]]; then
   OS=$(os)
   export OS
 fi
@@ -85,18 +88,20 @@ run-steps() {
   while (( $# )) ; do
     local name=$1 ; shift
     local fn=$1 ; shift
+    echo "$name..."
     # Only run if an earlier step has not failed.
+    # For all failed steps, write out an empty checkbox.
     if [[ $failed == 0 ]] ; then
-      echo "$name..."
       if $fn | indent ; then
         echo "- [X] $name" >> .cache/checklist
       else
         ((failed++))
+        echo "- [ ] $name" >> .cache/checklist
+        echo "Failed" | indent
       fi
-    fi
-    # For all failed steps, write out an empty checkbox.
-    if [[ $failed != 0 ]] ; then
+    else
       echo "- [ ] $name" >> .cache/checklist
+      echo "Skipped" | indent
     fi
   done
   if [[ $failed != 0 ]] ; then

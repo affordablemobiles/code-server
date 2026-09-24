@@ -22,6 +22,148 @@ Code v99.99.999
 
 ## Unreleased
 
+Code v1.138.0
+
+### Changed
+
+- Update to Code 1.138.0
+
+### Fixed
+
+- Preserve the original path, query parameters, and fragment when rewriting
+  localhost URLs through the port proxy. If `VSCODE_PROXY_URI` has any query
+  parameters or fragments, those will be lost.
+
+## [4.137.0](https://github.com/coder/code-server/releases/tag/v4.137.0) - 2026-09-11
+
+Code v1.137.0
+
+### Changed
+
+- Update to Code 1.137.0
+
+## [4.136.2](https://github.com/coder/code-server/releases/tag/v4.136.2) - 2026-09-08
+
+Code v1.136.1
+
+### Changed
+
+- Update to Code 1.136.1
+
+### Fixed
+
+- 4.136.2 replaces a removed 4.136.1 release that had the data path incorrectly
+  being set to `~/.vscode-server-oss/data`.
+
+## [4.135.0](https://github.com/coder/code-server/releases/tag/v4.135.0) - 2026-08-27
+
+Code v1.135.0
+
+### Changed
+
+- Update to Code 1.135.0
+
+## [4.134.0](https://github.com/coder/code-server/releases/tag/v4.134.0) - 2026-08-24
+
+Code v1.134.0
+
+### Added
+
+- New `--socket-fd` flag that can be used to listen on a file descriptor. In
+  particular, this allows using code-server with systemd's socket activation.
+- New `--vscode-option` repeatable flag that can be used to pass through options
+  to VS Code. It requires `flag=value` or simply `flag` for booleans. For
+  example: `--vscode-option enable-sandbox --vscode-option agents=true`. The
+  `VSCODE_OPTIONS` environment variable may also be used. For example:
+  `VSCODE_OPTIONS="enable-sandbox agents=true"`. Note that code-server simply
+  splits this variable on spaces and is not aware of quoting.
+
+### Changed
+
+- Update to Code 1.134.0
+- Remove `--unsafe-perm` from installation scripts. This flag results in an
+  error when used with npm since v12 and has been a no-op since v7. If you are
+  installing with a version of npm older than v7 as root, installation may not
+  work correctly.
+
+## [4.133.0](https://github.com/coder/code-server/releases/tag/v4.133.0) - 2026-08-17
+
+Code v1.133.0
+
+### Changed
+
+- Update to Code 1.133.0
+
+## [4.132.0](https://github.com/coder/code-server/releases/tag/v4.132.0) - 2026-08-10
+
+Code v1.132.0
+
+### Changed
+
+- Update to Code 1.132.0
+
+### Fixed
+
+- When proxying, cookies were being decoded and re-encoded, which could cause
+  issues for applications that encode differently. Cookies are now passed
+  through unchanged (aside from stripping out code-server's session token).
+
+## [4.131.0](https://github.com/coder/code-server/releases/tag/v4.131.0) - 2026-07-30
+
+Code v1.131.0
+
+### Changed
+
+- Update to Code 1.131.0
+
+## [4.130.0](https://github.com/coder/code-server/releases/tag/v4.130.0) - 2026-07-24
+
+Code v1.130.0
+
+### Changed
+
+- Update to Code 1.130.0
+
+## [4.129.0](https://github.com/coder/code-server/releases/tag/v4.129.0) - 2026-07-17
+
+Code v1.129.0
+
+### Changed
+
+- Update to Code 1.129.0
+
+## [4.128.0](https://github.com/coder/code-server/releases/tag/v4.128.0) - 2026-07-11
+
+Code v1.128.0
+
+### Changed
+
+- Update to Code 1.128.0
+
+## [4.127.0](https://github.com/coder/code-server/releases/tag/v4.127.0) - 2026-07-02
+
+Code v1.127.0
+
+### Changed
+
+- Update to Code 1.127.0
+
+## [4.126.0](https://github.com/coder/code-server/releases/tag/v4.126.0) - 2026-06-24
+
+Code v1.126.0
+
+### Changed
+
+- Update to Code 1.126.0
+
+## [4.125.0](https://github.com/coder/code-server/releases/tag/v4.125.0) - 2026-06-18
+
+Code v1.125.0
+
+### Changed
+
+- Update to Code 1.125.0
+
 ## [4.124.2](https://github.com/coder/code-server/releases/tag/v4.124.2) - 2026-06-16
 
 Code v1.124.2

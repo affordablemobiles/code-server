@@ -18,7 +18,7 @@ symlink() {
   dest="$2"
   rm -rf "$dest"
   case $OS in
-    windows) mklink /J "$dest" "$source" ;;
+    windows) cmd //c mklink //J "$dest" "$source" ;;
     *) ln -s "$source" "$dest" ;;
   esac
 }
@@ -65,9 +65,9 @@ main() {
     echo "USE AT YOUR OWN RISK!"
   fi
 
-  if [ "$major_node_version" -ne "${FORCE_NODE_VERSION:-22}" ]; then
-    echo "ERROR: code-server currently requires node v22."
-    if [ -n "$FORCE_NODE_VERSION" ]; then
+  if [ "$major_node_version" -ne "${FORCE_NODE_VERSION:-24}" ]; then
+    echo "ERROR: code-server currently requires node v24."
+    if [ -n "${FORCE_NODE_VERSION:-}" ]; then
       echo "However, you have overrided the version check to use v$FORCE_NODE_VERSION."
     fi
     echo "We have detected that you are on node v$major_node_version"
@@ -76,20 +76,6 @@ main() {
     exit 1
   fi
 
-  # Under npm, if we are running as root, we need --unsafe-perm otherwise
-  # post-install scripts will not have sufficient permissions to do their thing.
-  if is_root; then
-    case "${npm_config_user_agent-}" in npm*)
-      if [ "${npm_config_unsafe_perm-}" != "true" ]; then
-        echo "Please pass --unsafe-perm to npm to install code-server"
-        echo "Otherwise post-install scripts will not have permissions to run"
-        echo "See https://docs.npmjs.com/misc/config#unsafe-perm"
-        echo "See https://stackoverflow.com/questions/49084929/npm-sudo-global-installation-unsafe-perm"
-        exit 1
-      fi
-      ;;
-    esac
-  fi
 
   if ! vscode_install; then
     echo "You may not have the required dependencies to build the native modules."
@@ -110,7 +96,7 @@ install_with_yarn_or_npm() {
   # end-user we want to keep using whatever package manager is in use.
   case "${npm_config_user_agent-}" in
     npm*)
-      if ! npm install --unsafe-perm --omit=dev; then
+      if ! npm install --omit=dev; then
         return 1
       fi
       ;;

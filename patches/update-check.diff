@@ -93,7 +93,7 @@ Index: code-server/lib/vscode/src/vs/base/common/product.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/base/common/product.ts
 +++ code-server/lib/vscode/src/vs/base/common/product.ts
-@@ -67,6 +67,7 @@ export type ExtensionVirtualWorkspaceSup
+@@ -99,6 +99,7 @@ export interface IDictationRuntimeProduc
  export interface IProductConfiguration {
  	readonly codeServerVersion?: string
  	readonly rootEndpoint?: string
@@ -101,32 +101,32 @@ Index: code-server/lib/vscode/src/vs/base/common/product.ts
  
  	readonly version: string;
  	readonly date?: string;
-@@ -119,6 +120,7 @@ export interface IProductConfiguration {
- 		readonly resourceUrlTemplate: string;
- 		readonly nlsBaseUrl: string;
- 		readonly accessSKUs?: string[];
-+		readonly authorizationHeaderToken?: string;
+@@ -145,6 +146,7 @@ export interface IProductConfiguration {
  	};
  
- 	readonly mcpGallery?: {
+ 	readonly extensionsGallery?: {
++		readonly authorizationHeaderToken?: string;
+ 		readonly serviceUrl: string;
+ 		readonly controlUrl: string;
+ 		readonly extensionUrlTemplate: string;
 Index: code-server/lib/vscode/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/webClientServer.ts
 +++ code-server/lib/vscode/src/vs/server/node/webClientServer.ts
-@@ -360,6 +360,7 @@ export class WebClientServer {
+@@ -401,6 +401,7 @@ export class WebClientServer {
  		const productConfiguration: Partial<Mutable<IProductConfiguration>> = {
  			codeServerVersion: this._productService.codeServerVersion,
  			rootEndpoint: rootBase,
 +			updateEndpoint: !this._environmentService.args['disable-update-check'] ? rootBase + '/update/check' : undefined,
  			embedderIdentifier: 'server-distro',
+ 			voiceWsUrl: this._productService.voiceWsUrl,
  			extensionsGallery: this._productService.extensionsGallery,
- 		};
 Index: code-server/lib/vscode/src/vs/server/node/serverEnvironmentService.ts
 ===================================================================
 --- code-server.orig/lib/vscode/src/vs/server/node/serverEnvironmentService.ts
 +++ code-server/lib/vscode/src/vs/server/node/serverEnvironmentService.ts
-@@ -16,6 +16,8 @@ import { join } from '../../base/common/
- import { ProtocolConstants } from '../../base/parts/ipc/common/ipc.net.js';
+@@ -32,6 +32,8 @@ export function getRedactedServerParsedA
+ }
  
  export const serverOptions: OptionDescriptions<Required<ServerParsedArgs>> = {
 +	/* ----- code-server ----- */
@@ -134,7 +134,7 @@ Index: code-server/lib/vscode/src/vs/server/node/serverEnvironmentService.ts
  
  	/* ----- server setup ----- */
  
-@@ -108,6 +110,8 @@ export const serverOptions: OptionDescri
+@@ -124,6 +126,8 @@ export const serverOptions: OptionDescri
  };
  
  export interface ServerParsedArgs {
